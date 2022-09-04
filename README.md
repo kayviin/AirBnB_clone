@@ -23,11 +23,11 @@
 - [Usage](#usage)
 - [Authors](#authors)
 
-## 🧐 About <a name = "about"></a>
+## About <a name = "about"></a>
 
 This is a Airbnb clone projects that will be build with the aim to learn and apply concepts of high level programming and software engineering in general
 
-## 🏁 Getting Started <a name = "getting_started"></a>
+## Getting Started <a name = "getting_started"></a>
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
@@ -55,7 +55,7 @@ This project uses the python unittest model
 #### Run a test from a specific file
 `python3 -m unittest tests/tespytestt_models/test_base_model.py`
 
-## 🎈 Usage <a name="usage"></a>
+## Usage <a name="usage"></a>
 
 You can run the schell (in an interactive or non-interactive mode) to manipulate your models.
 You can start it from running the console.py file:
@@ -110,11 +110,11 @@ The following commands are supported:
   Quit the shell 
 
 
-## ⛏️ Built Using <a name = "built_using"></a>
+## Built Using <a name = "built_using"></a>
 
 - [Python](https://www.python.org/) - Programming language
 
 ## ✍️ Authors <a name = "authors"></a>
 
-- [@callistus406](https://github.com/callistus406 - Ukaobasi Callistus
+- [@callistus406](https://github.com/callistus406) - Ukaobasi Callistus
 - [@Kayviin](https://github.com/kayviin) - Chuka Okodike
