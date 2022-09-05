@@ -1,283 +1,145 @@
 #!/usr/bin/python3
+"""[summary]
+"""
 
-"""A module for command line interface tool"""
 import cmd
-import json
-from models.amenity import Amenity
-from models.base_model import BaseModel
-from models.city import City
-from models.place import Place
-from models.review import Review
-from models.state import State
-from models.user import User
-from models import storage
+import models
 
 
 class HBNBCommand(cmd.Cmd):
-
-    """
-    A command line interface tool
-    for the HBNB project
-    """
-
+    """ cmd clone"""
+    intro = 'Welcome to the Airbnb console. Type help or ? to list commands.\n'
     prompt = '(hbnb) '
-    __classes = {
 
-        'Amenity',
-        'BaseModel',
-        'City',
-        'Place',
-        'Review',
-        'State',
-        'User',
-
-    }
-
-    def precmd(self, arg):
-
-        if "." in arg and "(" in arg and ")" in arg:
-            if "{" not in arg and "}" not in arg:
-                holder = arg.split(".")
-                holder1 = holder[1].split("(")
-                holder2 = holder1[1].split(")")
-                if "\"" in arg:
-                    holder3 = holder2[0].split("\"")
-                    try:
-                        args = [holder1[0],
-                                holder[0],
-                                holder3[1],
-                                holder3[3],
-                                holder3[5]
-                                ]
-                        arg = " ".join(args)
-                    except IndexError:
-                        arg = holder1[0] + " " + holder[0] + " " + holder3[1]
-
-                else:
-                    arg = holder1[0] + " " + holder[0]
-        return arg
-
-    def do_count(self, arg):
-        """ Counts any class attribute"""
-        if arg in self.__classes:
-            with open("storage.json", 'r') as file:
-                new = json.load(file)
-                holder = []
-                count = 0
-                for data in new:
-                    if arg[0] in data:
-                        holder.append(str(new[data]))
-                        count += 1
-            file.close()
-            print(count)
+    def __init__(self, completekey='tab', stdin=None, stdout=None):
+        """init method"""
+        super().__init__(completekey, stdin, stdout)
 
     def do_quit(self, arg):
-        """Quits the console and returns nothing"""
-        exit()
+        """Quit command to exit the program"""
+        return True
 
     def do_EOF(self, arg):
-        """sends EOF signal to the console"""
-        print("")
+        """Quit console"""
         return True
 
     def emptyline(self):
-        """Skips empty lines of command"""
-        pass
+        """empty line. Do nothing"""
+        return False
 
     def do_create(self, arg):
         """
-        creates a new instance of BaseModel
-        usage: create BaseModel
+        Creates a new instance of BaseModel,
+        saves it (to the JSON file) and prints the id
         """
-        value = parse(arg)
-        if not value:
-            print("** class name missing **")
-        # if value[0] == 'BaseModel':
-        elif value[0] in self.__classes:
-            print(eval(value[0])().id)
-            storage.save()
 
-        else:
-            print("** class doesn't exist **")
+        # TODO: make this common check a property
+        if arg == "":
+            print('** class name missing **')
+            return
+        try:
+            model = models.classes[arg]()
+            models.storage.new(model)
+            models.storage.save()
+            print(model.id)
+        except Exception as e:
+            print(e)
 
     def do_show(self, arg):
         """
-        Prints the string representation
-        of an instance based on the class
+        Prints the string representation of an instance
+        based on the class `name` and `id`
         """
-        value = parse(arg)
+        if arg == "":
+            print('** class name missing **')
+            return
 
-        if not value:
-            print("** class name missing **")
+        try:
+            model_name, model_id = arg.split(' ')
+            model = models.storage.find(model_name, model_id)
+            print(model.__str__())
 
-        elif value[0] not in self.__classes:
-            print("** class doesn't exist **")
+        except Exception as e:
 
-        elif value[0] in self.__classes:
-            with open("storage.json", "r") as file:
-                holder = json.load(file)
-                file.close()
-            try:
-                key = value[0] + "." + value[1]
-            except IndexError:
+            if arg.count(' ') == 0:
                 print("** instance id missing **")
-                return
-            try:
-                print(holder[key])
-                # print(storage.all()[key])
-            except KeyError:
-                print("** no instance found **")
+            elif arg.count(' ') > 1:
+                print("** too many arguments (2 arguments required)**")
+            else:
+                print(e)
 
     def do_destroy(self, arg):
         """
-        Deletes an instance based
-        on the class name passed
-        as an argument with the id
+        Deletes an instance based on the class name and id
+        (save the change into the JSON file)
         """
-        value = parse(arg)
-        all_obj = storage.all()
+        if arg == "":
+            print('** class name missing **')
+            return
 
-        if not value:
-            print("** class name missing **")
+        try:
+            model_name, model_id = arg.split(' ')
+            models.classes[model_name]  # check the model is supported
+            models.storage.delete(model_name, model_id)
+            models.storage.save()
 
-        elif value[0] == 'all':
-            with open(type(self).__file_path, "r") as file:
-                holder = json.load(file)
-            file.close()
-            holder.clear()
-            with open("file.json", "w") as file:
-                json.dump(holder, file, indent=2)
-            file.close()
-            with open("storage.json", "w") as file:
-                json.dump(holder, file, indent=2)
-            file.close()
-            storage.destroy()
+        except Exception as e:
 
-        elif value[0] not in self.__classes:
-            print("** class doesn't exist **")
-
-        elif value[0] in self.__classes:
-            with open("file.json", "r") as file:
-                holder = json.load(file)
-            file.close()
-            try:
-                key = value[0] + "." + value[1]
-            except IndexError:
+            if arg.count(' ') == 0:
                 print("** instance id missing **")
-                return
-            try:
-                holder.pop(key)
-                objects = storage
-                objects.destroy(key)
-                objects.save()
-            except KeyError:
-                print("** no instance found **")
-                return
-            with open("file.json", "w") as file:
-                json.dump(holder, file, indent=2)
-            file.close()
-#           FOR STORAGE REPRESENTATION
-            with open("storage.json", "r") as file:
-                holder = json.load(file)
-            file.close()
-            try:
-                key = value[0] + "." + value[1]
-            except IndexError:
-                print("** instance id is missing **")
-                return
-
-            with open("storage.json", "w") as file:
-                json.dump(holder, file, indent=2)
-            file.close()
+            elif arg.count(' ') > 1:
+                print("** too many arguments (2 arguments required)**")
+            else:
+                print(e)
 
     def do_all(self, arg):
-        """"
-        prints all string representation
-        of all
         """
-        value = parse(arg)
-
-        if not value:
-            hold = storage.all()
-            holder = []
-            for key in hold.keys():
-                holder.append(str(hold[key]))
-            # with open("storage.json", 'r') as file:
-            #     new = json.load(file)
-            #     holder = []
-            #     for data in new:
-            #             holder.append(str(new[data]))
-            print(holder)
-            del holder
-            return
-
-        elif value[0] in self.__classes:
-            with open("storage.json", 'r') as file:
-                new = json.load(file)
-                holder = []
-                for data in new:
-                    if value[0] in data:
-                        holder.append(str(new[data]))
-            file.close()
-            print(holder)
-
-        elif value[0] not in self.__classes:
-            print("** class doesn't exist **")
-            return
+        Prints all string representation of all instances
+        based or not on the class name.
+        """
+        if arg == "":
+            print([x.__str__() for x in models.storage.all().values()])
+        else:
+            try:
+                model = models.classes[arg]
+                resp = []
+                for l in models.storage.all().values():
+                    if type(l) == model:
+                        resp.append(l.__str__())
+                print(resp)
+            except Exception as e:
+                print(e)
 
     def do_update(self, arg):
         """
-        updates a given instance
-        based on the class namean id
-        Eg:
-        <update> <class name> <id> <attr name>
+        Updates an instance based on the class name and id by adding
+        or updating attribute (save the change into the JSON file)
+        Usage: update <class name> <id> <attribute name> "<attribute value>"
         """
-        value = parse(arg)
 
-        if not value:
-            print("** class name missing **")
+        if arg == "":
+            print('** class name missing **')
             return
 
-        elif value[0] not in self.__classes:
-            print("** class doesn't exist **")
-            return
+        try:
+            # TODO: Handle case where the value to update has a space character
+            model_name, model_id, attr, value = arg.split(' ')
 
-        elif len(value) < 2:
-            print("** instance id missing **")
-            return
+            models.storage.update(model_name, model_id, attr, value)
+            models.storage.save()
 
-        # elif len(value) < 4:
-        #     print("** value missing **")
-
-        else:
-            try:
-                with open("file.json", 'r+') as file:
-                    holder = json.load(file)
-                file.close()
-                key = value[0] + "." + value[1]
-                if key not in holder.keys():
-                    print("** no instance found **")
-                    return
-                try:
-                    attr_name = value[2]
-                except IndexError:
-                    print("** attribute name missing **")
-                    return
-                try:
-                    new_value = value[3]
-                except IndexError:
-                    print("** value missing **")
-                    return
-                setattr(storage.all()[key], attr_name, new_value)
-                storage.all()[key].save()
-            except IndexError:
-                print("** no instance found **")
-
-        pass
-
-
-def parse(arg):
-    return arg.split()
+        except Exception as e:
+            if arg.count(' ') == 0:
+                print("** instance id missing **")
+            elif arg.count(' ') == 1:
+                print("** attribute name missing **")
+            elif arg.count(' ') == 2:
+                print("** value missing **")
+            elif arg.count(' ') > 3:
+                # TODO: Allow this case, and ignore the extra arguments
+                print("** too many arguments (2 arguments required)**")
+            else:
+                print(e)
 
 
 if __name__ == '__main__':
