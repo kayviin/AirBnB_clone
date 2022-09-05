@@ -47,9 +47,9 @@ class TestClass(unittest.TestCase):
 
     def test_assign_attribute(self):
         """ Test new attribute"""
-        self.model.name = "Holberton"
+        self.model.name = "My First Model"
         self.model.my_number = 89
-        self.assertIs(self.model.name, "Holberton")
+        self.assertIs(self.model.name, "My First Model")
         self.assertIs(self.model.my_number, 89)
 
     def test_create_instance_from_dict(self):
@@ -58,7 +58,7 @@ class TestClass(unittest.TestCase):
                       'created_at': '2017-09-28T21:03:54.052298',
                       '__class__': 'BaseModel', 'my_number': 89,
                       'updated_at': '2017-09-28T21:03:54.052302',
-                      'name': 'Holberton'}
+                      'name': 'My First Model'}
 
         my_model = BaseModel(**model_dict)
         self.assertIsInstance(my_model, BaseModel)
@@ -68,7 +68,7 @@ class TestClass(unittest.TestCase):
 
     def test_to_dict_success(self):
 
-        self.model.name = "Holberton"
+        self.model.name = "My First Model"
         self.model.my_number = 89
         my_model_json = self.model.to_dict()
 
