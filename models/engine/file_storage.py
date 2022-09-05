@@ -1,100 +1,69 @@
-#!/usr/bin/python3
-"""
-File storage:  serializes instances to a JSON file and
-    deserializes JSON file to instances:
-"""
-
+i#!/usr/bin/python3
 import json
-import models
-import os
+from models.amenity import Amenity
+from models.base_model import BaseModel
+from models.city import City
+from models.place import Place
+from models.review import Review
+from models.state import State
+from models.user import User
 
 
-class Objects(dict):
-    """class object"""
-
-    def __getitem__(self, key):
-        """get item"""
-        try:
-            return super(Objects, self).__getitem__(key)
-        except Exception as e:
-            raise Exception("** no instance found **")
-
-    def pop(self, key):
-        """pop item"""
-        try:
-            return super(Objects, self).pop(key)
-        except Exception as e:
-            raise Exception("** no instance found **")
-
-
-class FileStorage:
+class FileStorage():
     """
-    serializes instances to a JSON file and
-    deserializes JSON file to instances.
+    deserializes instance of a JSON FILE
+    serializes instance to a JSON FILE
     """
 
-    __file_path = "file.json"
-    __objects = Objects()
-
-    def __init__(self):
-        """init method"""
-        super().__init__()
+    __objects = {}
+    __file_path = 'file.json'
+    __file_path2 = 'storage.json'
 
     def all(self):
-        """return the class atribute objects"""
-        return FileStorage.__objects
-
-    def reset(self):
-        """clear data on __object (cache)"""
-        self.__objects.clear()
+        """Returns the __objects dict"""
+        return type(self).__objects
 
     def new(self, obj):
-        """sets in __objects the obj with key <obj class name>.id"""
-        if obj is not None:
-            key = '{}.{}'.format(type(obj).__name__, obj.id)
-            self.__objects[key] = obj
+        """Adds obj in the __objects dict"""
+        key = obj.__class__.__name__ + "." + obj.id
+        type(self).__objects[key] = obj
+
+    def destroy(self, arg="None"):
+        """deletes the storage"""
+        if arg == "None":
+            type(self).__objects.clear()
+        else:
+            type(self).__objects.pop(arg)
 
     def save(self):
-        """ serializes __objects to the JSON file (path: __file_path)"""
-        file = FileStorage.__file_path
-
-        with open(file, mode="w", encoding="utf-8") as f:
-            f.write(
-                json.dumps(
-                    FileStorage.__objects,
-                    cls=models.base_model.BaseModelEncoder
-                    )
-                )
+        """serializes __objects to __file_path"""
+        with open(type(self).__file_path, "w", encoding='utf-8') as file:
+            dictionary = {}
+            for key, value in type(self).__objects.items():
+                dictionary[key] = value.to_dict()
+            # type(self).__objects.clear()
+            json.dump(dictionary, file, indent=2)
+        with open(type(self).__file_path2, "w") as file1:
+            dictionary1 = {}
+            for key, value in type(self).__objects.items():
+                dictionary1[key] = value
+            json.dump(dictionary1, file1, indent=2, default=str)
 
     def reload(self):
-        """deserializes the JSON file to __objects"""
-
-        file = FileStorage.__file_path
-        if not os.path.exists(file):
-            return
+        """
+        deserializes the json file to __objects
+        only if the json file exists
+        otherwise do nothing if the file doesn't exists
+        no exception is raised
+        """
         try:
-            with open(file, mode="r+", encoding="utf-8") as f:
-                file_string = f.read()
-                data = json.loads(file_string)
-                for object_key, model_data in data.items():
-                    model_name, model_id = object_key.split('.')
-                    model = models.classes[model_name](**model_data)
-                    self.new(model)
-
-        except Exception as e:
-            print(e)
-
-    def update(self, obj_name, obj_id, attr, value):
-        """update object with id `obj_id`"""
-        model = self.__objects["{}.{}".format(obj_name, obj_id)]
-        setattr(model, attr, value)
-
-    def find(self, obj_name, obj_id):
-        """find object with id `obj_id`"""
-        return self.__objects["{}.{}".format(obj_name, obj_id)]
-
-    def delete(self, obj_name, obj_id):
-        """
-        delete object with id `obj_id`
-        """
-        return self.__objects.pop("{}.{}".format(obj_name, obj_id))
+            with open(self.__file_path, 'r') as file:
+                value = json.load(file)
+                # self.__objects.update(value)
+                # file.close()
+                for object in value.values():
+                    class_name = object['__class__']
+                    del object['__class__']
+                    self.new(eval(class_name)(**object))
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            return
