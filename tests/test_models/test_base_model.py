@@ -64,7 +64,7 @@ class TestClass(unittest.TestCase):
         self.assertIsInstance(my_model, BaseModel)
         self.assertEqual(my_model.id,
                          "56d43177-cc5f-4d6c-a0c1-e167f8c27337")
-        self.assertEqual(my_model.name, "Holberton")
+        self.assertEqual(my_model.name, "My First Model")
 
     def test_to_dict_success(self):
 
