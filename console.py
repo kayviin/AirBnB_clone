@@ -103,8 +103,8 @@ class HBNBCommand(cmd.Cmd):
             try:
                 model = models.classes[arg]
                 resp = []
-                for l in models.storage.all().values():
-                    if type(l) == model:
+                for item in models.storage.all().values():
+                    if type(item) == model:
                         resp.append(l.__str__())
                 print(resp)
             except Exception as e:
