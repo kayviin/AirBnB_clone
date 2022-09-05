@@ -1,17 +1,11 @@
 #!/usr/bin/python3
+"""review module"""
 
-"""
-A subclass module of BaseModel
-located in the base_model.py
-"""
 from models.base_model import BaseModel
 
 
 class Review(BaseModel):
-    """
-    A subclass module of BaseModel
-    with some added attributes
-    """
+    """review class"""
     place_id = ""
     user_id = ""
     text = ""
