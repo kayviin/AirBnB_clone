@@ -1,17 +1,17 @@
 #!/usr/bin/python3
-""" user module"""
 
-from models.base_model import BaseModel
+"""
+A submodule of base_model.py
+"""
+from models import base_model
 
 
-class User(BaseModel):
-    """ user class"""
-
+class User(base_model.BaseModel):
+    """
+    A subclass of BaseModel Class
+    with some added attributes
+    """
     email = ""
     password = ""
     first_name = ""
     last_name = ""
-
-    def __init__(self, *args, **kwargs):
-        """init user"""
-        super().__init__(*args, **kwargs)
